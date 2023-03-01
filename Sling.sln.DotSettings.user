@@ -1,0 +1,4 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/Environment/Hierarchy/Build/BuildTool/RecentBuildToolPaths/=D_003A_005CSoftwares_005CVisualStudio_005CMSBuild_005CCurrent_005CBin_005CMSBuild_002Eexe/@EntryIndexedValue">True</s:Boolean>
+	
+	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">D:\Softwares\VisualStudio\MSBuild\Current\Bin\amd64\MSBuild.exe</s:String></wpf:ResourceDictionary>
