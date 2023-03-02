@@ -46,6 +46,34 @@ public:
 	bool ConveyorAudioOn;
 };
 
+USTRUCT(BlueprintType)
+struct FDebugeEntry : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	FDebugeEntry()
+	{
+		Time = 0.f;
+		PedalAudioOn = false;
+		HandleAudioOn = false;
+		ConveyorAudioOn = false;
+		Distance = 0.f;
+		
+	}
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Time;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool PedalAudioOn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool HandleAudioOn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool ConveyorAudioOn;
+};
+
 UCLASS()
 class SLING_API ATriggerManager : public AActor
 {
@@ -136,6 +164,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable *CurrentMusicData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UDataTable *DebugMusicData;
+	
 	// initialized in engine
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString MusicDataPath;

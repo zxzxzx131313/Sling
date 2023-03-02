@@ -58,8 +58,7 @@ ATriggerManager::ATriggerManager()
 	DebugPedal->SetRelativeLocation(FVector(0 ,-200, 0));
 	
 
-
-	TotalSpawnDistance = 0.f;
+	
 }
 
 // Called when the game starts or when spawned
@@ -74,7 +73,7 @@ void ATriggerManager::BeginPlay()
 	AudioImporter->OnResult.AddDynamic(this, &ATriggerManager::CheckImportedAudio);
 	AudioImporter->ImportAudioFromFile(ImportAudioPath, ERuntimeAudioFormat::Auto);
 
-	TotalSpawnDistance = 0.f;
+
 	count = 0;
 	Audio->OnAudioPlaybackPercent.AddDynamic(this, &ATriggerManager::ReactToAudio);
 
@@ -171,7 +170,7 @@ void ATriggerManager::AudioPreAnalyze()
      	// CSV must be in UTF8 format
      	FFileHelper::SaveStringToFile(TableCSV, *CSVPath, FFileHelper::EEncodingOptions::ForceUTF8);
 	}
-	SpawnTriggers();
+	SpawnedTriggers = SpawnTriggers();
 }
 
 void ATriggerManager::CheckImportedAudio(URuntimeAudioImporterLibrary* Importer, UImportedSoundWave* ImportedSoundWave, ERuntimeImportStatus Status)
@@ -207,25 +206,29 @@ void ATriggerManager::SetPedalDistanceAngle(int PedalCursor)
 
 	if (PedalCursor + 1 < TriggerHits.Num())
 	{
+		float TimeInAir = TriggerHits[PedalCursor + 1]->Time - TriggerHits[PedalCursor]->Time;
+		float Speed = TimeInAir * 800.f;
+		Spawned->SetSpeed(Speed);
 		if (TriggerHits[PedalCursor + 1]->PedalAudioOn)
 		{
-			float TimeInAir = TriggerHits[PedalCursor + 1]->Time - TriggerHits[PedalCursor]->Time;
-            float Speed = TimeInAir * 800.f;
+
             // FRotator AbsRotation = UKismetMathLibrary::FindLookAtRotation(SpawnedTriggers[PedalCursor]->GetActorLocation(), SpawnedTriggers[PedalCursor + 1]->GetActorLocation());
             // Pedals face the direction of launch
             // SpawnedTriggers[PedalCursor]->SetActorRotation(AbsRotation);
             float Angle = Spawned->ComputeAngle(TimeInAir, Speed);
             FRotator Rot = FRotator(Spawned->TransformAngleToWorldSpace(Angle));
             Spawned->SetAngle(Rot);
-            SpawnedTriggers[PedalCursor]->SetActorLocation(FVector(TotalSpawnDistance, 0, 0));
-            DistancesToPrevious.Add(Spawned->ComputeDistance(Angle, Speed, 0.f));
-            TotalSpawnDistance += DistancesToPrevious[DistancesToPrevious.Num()-1];
-            DistancesToStart.Add(TotalSpawnDistance);
-            
-            UE_LOG(LogTemp, Warning, TEXT("%d Pedal rotation %s location %s Angle %f speed %f fRotator %s "), PedalCursor, *SpawnedTriggers[PedalCursor]->GetActorRotation().ToString(), *SpawnedTriggers[PedalCursor]->GetActorLocation().ToString(), Angle, Speed, *Rot.ToString());
+			Spawned->SetFlyDistance(Spawned->ComputeDistance(Angle, Speed, 0.f));
+
+			UE_LOG(LogTemp, Warning, TEXT("%d Pedal rotation %s Angle %f speed %f fRotator %s "), PedalCursor, *SpawnedTriggers[PedalCursor]->GetActorRotation().ToString(), Angle, Speed, *Rot.ToString());
+		}
+		else
+		{
+			// FRotator AbsRotation = UKismetMathLibrary::FindLookAtRotation(SpawnedTriggers[PedalCursor]->GetActorLocation(), SpawnedTriggers[PedalCursor + 1]->GetActorLocation());
+			// Spawned->SetAngle(AbsRotation);
+
 		}
 	}
-
 }
 
 
@@ -234,61 +237,77 @@ TArray<ATrigger*> ATriggerManager::SpawnTriggers()
 
 	bool DoubleGap = true;
 	float Direction = 1.f;
-	bool First
-	// int PreviousPedalCursor = -1;
-
+	FString CSVPath = FPaths::ProjectDir()+TEXT("Content/MusicData/debug.csv");
+	
+	for (int cursor = 0; cursor < TriggerHits.Num(); cursor++)
+	{
+		if(TriggerHits[cursor]->HandleAudioOn)
+		{
+			if (DoubleGap)
+            {
+            	DoubleGap = false;
+            }
+            else
+            {
+            	DoubleGap = true;
+            	TriggerHits.RemoveAt(cursor);
+            	cursor -= 1;
+            }
+		}
+	}
+	
 	for (int cursor = 0; cursor < TriggerHits.Num(); cursor++)
 	{
 		FAudioTimeEntry *Entry = TriggerHits[cursor];
 		if (Entry->PedalAudioOn)
 		{
+
+			if (cursor > 0 && TriggerHits[cursor - 1]->PedalAudioOn)
+			{
+				ALaunchPedal *Spawned = Cast<ALaunchPedal>(SpawnedTriggers[cursor - 1]);
+
+				int SpawnLoc = DistancesToStart[DistancesToStart.Num()-1] + Spawned->GetFlyDistance();
+				DistancesToStart.Add(SpawnLoc);
+			}
+			else
+			{
+				if (cursor == 0)
+				{
+					DistancesToStart.Add(500.f * Entry->Time);
+				}
+				else
+				{
+					float Distance = 500.f * Entry->Time - 500.f * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
+                    DistancesToStart.Add(Distance);
+				}
+				
+			}
+			
 		 	SpawnedTriggers.Add(GetWorld()->SpawnActor<ALaunchPedal>(ALaunchPedal::StaticClass(), FVector(0, 0, 0), FRotator(0)));
-			// if gap within one sec consider as consecutive movements
-			// if (PreviousPedalCursor != -1)
-			// {
-			// 	SetPedalDistanceAngle(PreviousPedalCursor);
-			// }
-			// else
-			// {
-			DistancesToStart.Add(500.f * Entry->Time);
-			DistancesToPrevious.Add( DistancesToStart[-1] - TotalSpawnDistance);
-			TotalSpawnDistance += DistancesToPrevious[-1];
+
 			SetPedalDistanceAngle(cursor);
-			// }
-			//
-			// PreviousPedalCursor = cursor;
+
+			SpawnedTriggers[cursor]->SetActorLocation(FVector(DistancesToStart[cursor], 0, 0));
+			
+	
 		}
 		else if (Entry->HandleAudioOn)
 		{
-			if (DoubleGap)
-			{
-				DistancesToStart.Add(500.f * Entry->Time);
-				DistancesToPrevious.Add( DistancesToStart[-1] - TotalSpawnDistance);
-				TotalSpawnDistance += DistancesToPrevious[-1];
-				
-				SpawnedTriggers.Add(GetWorld()->SpawnActor<ASlingHandle>(ASlingHandle::StaticClass(), FVector(TotalSpawnDistance, 200.f * Direction, 300.f), FRotator(0)));
-				Direction *= -1.f;
-                DoubleGap = false;
-			}else
-			{
-				DoubleGap = true;
-				TriggerHits.RemoveAt(cursor);
-			}
+			float Distance = 500.f * Entry->Time - 500.f * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
+			DistancesToStart.Add(Distance);
 			
+			SpawnedTriggers.Add(GetWorld()->SpawnActor<ASlingHandle>(ASlingHandle::StaticClass(), FVector(DistancesToStart[DistancesToStart.Num()-1], 200.f * Direction, 300.f), FRotator(0)));
+			Direction *= -1.f;
+
 		}
 		else if (Entry->ConveyorAudioOn)
 		{
-			DistancesToStart.Add(500.f * Entry->Time);
-			DistancesToPrevious.Add( DistancesToStart[-1] - TotalSpawnDistance);
-			TotalSpawnDistance += DistancesToPrevious[-1];
+
+			float Distance = 500.f * Entry->Time - 500.f * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
+			DistancesToStart.Add(Distance);
 			
-			SpawnedTriggers.Add(GetWorld()->SpawnActor<ASpeedConveyor>(ASpeedConveyor::StaticClass(), FVector(TotalSpawnDistance, 300.f, 0), FRotator(0)));
+			SpawnedTriggers.Add(GetWorld()->SpawnActor<ASpeedConveyor>(ASpeedConveyor::StaticClass(), FVector(DistancesToStart[DistancesToStart.Num()-1], 300.f, 0), FRotator(0)));
 		}
-	}
-	// set the last pedal's properties
-	if (PreviousPedalCursor < TriggerHits.Num())
-	{
-		// SetPedalDistanceAngle(PreviousPedalCursor, TriggerHits[PreviousPedalCursor + 1]->Time - TriggerHits[PreviousPedalCursor]->Time, SpawnedTriggers);
 	}
 	return SpawnedTriggers;
 }
@@ -337,14 +356,15 @@ void ATriggerManager::ReactToAudio(const USoundWave* PlayingSoundWave, const flo
 	DebugHandle->SetWorldScale3D(FVector(1.f, 1.f, Handel * 2.f));
 	DebugConveyor->SetWorldScale3D(FVector(1.f, 1.f, Conveyor * 2.f));
 	
-	float time = FMath::TruncToInt(CurrentPlayTime * 10000.f) / 10000.f;
+	float time = FMath::TruncToInt(CurrentPlayTime * 100.f) / 100.f;
 	
 	UE_LOG(LogTemp, Warning, TEXT("percent %f, time: %f Time orgin: %f aiming time: %f"), PlaybackPercent, time, CurrentPlayTime, TriggerHits[count]->Time);
 	
 	if (FMath::Abs(time - TriggerHits[count]->Time) < 0.02)
 	{
-		Objs[0]->SetActorLocation(FVector(DistancesToStart[count], 0, 80));
-		UE_LOG(LogTemp, Warning, TEXT("debug loc: %s"), *Objs[0]->GetActorLocation().ToString());
+		
+		Objs[0]->SetActorLocation(SpawnedTriggers[count]->GetActorLocation());
+		UE_LOG(LogTemp, Warning, TEXT("coutn: %d debug loc: %s"), count, *SpawnedTriggers[count]->GetActorLocation().ToString());
 		count++;
 	}
 	

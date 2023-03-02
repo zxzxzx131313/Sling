@@ -31,6 +31,7 @@ ALaunchPedal::ALaunchPedal()
 	LaunchSpeed = 1000.f;
 	LaunchAngle = FRotator(30.f, 0.f, 0.f);
 	Gravity = 980.f;
+	FlyDistance = 0.f;
 	// Arrow->SetRelativeRotation(LaunchAngle);
 	Arrow->SetVisibility(true);
 	Arrow->SetHiddenInGame(false);
@@ -121,4 +122,12 @@ void ALaunchPedal::SetSpeed(float Speed)
 	LaunchSpeed = Speed;
 }
 
+void ALaunchPedal::SetFlyDistance(float Distance)
+{
+	FlyDistance = Distance;
+}
 
+float ALaunchPedal::GetFlyDistance()
+{
+	return FlyDistance;
+}

@@ -50,6 +50,12 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetSpeed(float Speed);
+
+	UFUNCTION(BlueprintCallable)
+	void SetFlyDistance(float Distance);
+
+	UFUNCTION(BlueprintCallable)
+	float GetFlyDistance();
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -74,4 +80,6 @@ private:
 	float LaunchSpeed;
 	
 	FRotator LaunchAngle;
+
+	float FlyDistance;
 };
