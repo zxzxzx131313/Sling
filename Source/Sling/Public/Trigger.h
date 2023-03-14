@@ -3,8 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MusicManager.h"
+
 #include "GameFramework/Actor.h"
+
 #include "GameFramework/Character.h"
+#include "RuntimeAudioImporter/Public/RuntimeAudioImporterLibrary.h"
+#include "TP_FirstPerson/TP_FirstPersonCharacter.h"
+
 #include "Trigger.generated.h"
 
 
@@ -28,6 +34,24 @@ public:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent *Mesh;
+
+	UFUNCTION(BlueprintCallable)
+	void CheckImportedAudio(URuntimeAudioImporterLibrary* Importer, UImportedSoundWave* ImportedSoundWave, ERuntimeImportStatus Status);
+
+	// initialized in engine
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ImportAudioPath;
 	
-	ACharacter *PlayerRef;
+
+	// ATriggerManager *TriggerManager;
+
+	float TimeStamp;
+
+	float TimeErrorMargin;
+	
+	URuntimeAudioImporterLibrary *AudioImporter;
+	
+	ATP_FirstPersonCharacter* PlayerRef;
+
+	AMusicManager *MusicManager;
 };

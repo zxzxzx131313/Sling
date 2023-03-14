@@ -6,6 +6,7 @@
 #include <valarray>
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Math/UnitConversion.h"
 
 // Sets default values
@@ -57,6 +58,14 @@ void ALaunchPedal::NotifyActorBeginOverlap(AActor* OtherActor)
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Petal overlap")));
 		FVector Force = ComputeLaunchForce();
 		PlayerRef->LaunchCharacter(Force, true, true);
+
+		// TODO:: FOnTouchTrigger send this->TimeStamp to a game board manager. 
+		if (MusicManager->GetMusicPlayTime() - this->TimeStamp < TimeErrorMargin)
+		{
+			// scoreboard ++
+			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, FString::Printf(TEXT("Hit on Time")));
+			PlayerRef->Score += 1;
+		}
 	}
 }
 

@@ -2,8 +2,6 @@
 
 #include "TP_FirstPerson/TP_FirstPersonCharacter.h"
 
-// #include <shobjidl_core.h>
-
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -11,7 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "Kismet/KismetSystemLibrary.h"
-// #include "CrashReportCore/Public/Android/AndroidErrorReport.h"
+
 #include "GameFramework/CharacterMovementComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -57,8 +55,9 @@ ATP_FirstPersonCharacter::ATP_FirstPersonCharacter()
 	Debug = false;
 	GetCharacterMovement()->AirControl = 0.f;
 	GetCharacterMovement()->GravityScale = 1.5f;
+	// Score system init
+	Score = 0.f;
 
-	
 	// Setup Cable
 	// CableSling = CreateDefaultSubobject<UCableComponent>(TEXT("Cable"));
 	// CableSling->bAttachEnd = true;
@@ -190,10 +189,10 @@ void ATP_FirstPersonCharacter::FindAttachPoint()
 	// Find first hit point
 	bool Hit = UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), SearchStart, SearchEnd, 10.f, objectTypesArray, false, ignoredActor, EDrawDebugTrace::None, HitResult, true);
 
-	HitTrigger = Cast<ASlingHandle>(HitResult.GetActor());
-	if (HitTrigger && Hit)
+	// HitTrigger = Cast<ASlingHandle>(HitResult.GetActor());
+	if (Hit)
 	{
-		DragLocation = HitTrigger->GetActorLocation();
+		DragLocation = HitResult.GetActor()->GetActorLocation();
 		CanDrag = true;
 
 		// GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Hit loacation %s"), *DragLocation.ToString()));
@@ -305,10 +304,10 @@ void ATP_FirstPersonCharacter::Attach(const FInputActionValue& Value)
         	NewDragLocation = FVector(0.f, 0.f, 0.f);
 
         	// Restore box collision that was set to none for passing through without blocking
-        	if (HitHandle)
-        	{
-        		HitHandle->Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
-        	}
+        	// if (HitHandle)
+        	// {
+        	// 	HitHandle->Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+        	// }
         	
         }
 	}

@@ -8,7 +8,6 @@
 #include "InputMappingContext.h"
 
 #include "CableComponent.h"
-#include "SlingHandle.h"
 
 #include "TP_FirstPersonCharacter.generated.h"
 
@@ -122,8 +121,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	bool CanDrag;
 
-	UPROPERTY(BlueprintReadWrite)
-	ASlingHandle *HitTrigger;
+	// UPROPERTY(BlueprintReadWrite)
+	// ASlingHandle *HitTrigger;
 
 	UPROPERTY(BlueprintReadWrite)
 	float CableLength;
@@ -145,10 +144,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Debug;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CurrentMusicTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Score;
+
 private:
 	UCableComponent *Cable;
 
 	bool Triggered;
 
-	ASlingHandle* HitHandle;
+	// ASlingHandle* HitHandle;
+	
 };

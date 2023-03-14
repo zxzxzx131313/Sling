@@ -38,7 +38,7 @@ void ASpeedConveyor::BeginPlay()
 	CollisionBox->SetBoxExtent(Mesh->GetCollisionShape().GetBox());
 	// CollisionBox->SetRelativeLocation(FVector(0.f, 0.f, 2 * Mesh->GetCollisionShape().GetBox().Z) - Mesh->GetCollisionShape().GetBox() * GetActorForwardVector()/2.f);
 	CollisionBox->SetRelativeLocation(FVector(0.f, 0.f, 2 * Mesh->GetCollisionShape().GetBox().Z));
-	UE_LOG(LogTemp, Warning, TEXT("Box Extent: %s"), *Mesh->GetCollisionShape().GetBox().ToString());
+	// UE_LOG(LogTemp, Warning, TEXT("Box Extent: %s"), *Mesh->GetCollisionShape().GetBox().ToString());
 }
 
 void ASpeedConveyor::NotifyActorBeginOverlap(AActor* OtherActor)
