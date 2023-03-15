@@ -12,7 +12,7 @@ AMusicManager::AMusicManager()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Audio = CreateDefaultSubobject<UMainMusicAudioComponent>(TEXT("Audio"));
+	Audio = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio"));
 	Audio->SetupAttachment(RootComponent);
 	Audio->SetAutoActivate(false);
 
@@ -95,7 +95,7 @@ void AMusicManager::AudioPreAnalyze()
      		TArray<float> StrengthsPerMilliseconds;
      		float TimeCursor = i / 100.f;
      		AudioAnalyzer->GetNormalizedChannelConstantQAtTime(TimeCursor, 0, StrengthsPerMilliseconds);
-     		bool PedalHit = StrengthsPerMilliseconds[PEDAL_TRIGGER] > 0.6f;
+     		bool PedalHit = StrengthsPerMilliseconds[PEDAL_TRIGGER] > 0.65f;
      		bool HandleHit = StrengthsPerMilliseconds[HANDLE_TRIGGER] > 0.6f;
      		bool ConveyorHit = StrengthsPerMilliseconds[CONVEYOR_TRIGGER] > 0.7f;
 

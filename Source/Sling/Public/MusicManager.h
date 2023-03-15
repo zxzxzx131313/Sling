@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "AudioAnalysisToolsLibrary.h"
 #include "ConstantQNRT.h"
-#include "MainMusicAudioComponent.h"
 #include "RuntimeAudioImporterLibrary.h"
 #include "Engine/DataTable.h"
 #include "Engine/StaticMeshActor.h"
@@ -61,7 +60,7 @@ public:
 	FName MusicName;
 	
 	UPROPERTY(BlueprintReadOnly)
-	UMainMusicAudioComponent *Audio;
+	UAudioComponent *Audio;
 
 	UPROPERTY(BlueprintReadOnly)
 	USoundBase *Music;

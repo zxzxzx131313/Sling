@@ -55,6 +55,8 @@ ATP_FirstPersonCharacter::ATP_FirstPersonCharacter()
 	Debug = false;
 	GetCharacterMovement()->AirControl = 0.f;
 	GetCharacterMovement()->GravityScale = 1.5f;
+	// 1000cm/s
+	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
 	// Score system init
 	Score = 0.f;
 

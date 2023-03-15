@@ -5,6 +5,7 @@
 
 #include <fstream>
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/DataTableFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -26,6 +27,8 @@ void ATriggerManager::BeginPlay()
 
 	CurrentMusicData = NewObject<UDataTable>(this, UDataTable::StaticClass(), TEXT("CurrentMusicData"));
 	CurrentMusicData->RowStruct = FAudioTimeEntry::StaticStruct();
+
+	PlayerRef = Cast<ATP_FirstPersonCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	
 	// for (int i = 0; i < 48; i++)
 	// {
@@ -98,8 +101,9 @@ void ATriggerManager::SetPedalDistanceAngle(int PedalCursor)
 void ATriggerManager::SpawnTriggers()
 {
 
-	bool DoubleGap = true;
+	bool DoubleGap = false;
 	float Direction = 1.f;
+	float CharacterSpeed = PlayerRef->GetCharacterMovement()->MaxWalkSpeed;
 	
 	for (int cursor = 0; cursor < TriggerHits.Num(); cursor++)
 	{
@@ -136,11 +140,11 @@ void ATriggerManager::SpawnTriggers()
 			{
 				if (cursor == 0)
 				{
-					DistancesToStart.Add(500.f * Entry->Time);
+					DistancesToStart.Add(CharacterSpeed * (Entry->Time -1.f < 0.f ? 0.f : Entry->Time -1.f));
 				}
 				else
 				{
-					float Distance = 500.f * Entry->Time - 500.f * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
+					float Distance = CharacterSpeed * Entry->Time - CharacterSpeed * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
                     DistancesToStart.Add(Distance);
 				}
 				
@@ -154,7 +158,7 @@ void ATriggerManager::SpawnTriggers()
 		}
 		else if (Entry->HandleAudioOn)
 		{
-			float Distance = 500.f * Entry->Time - 500.f * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
+			float Distance = CharacterSpeed * Entry->Time - CharacterSpeed * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
 			DistancesToStart.Add(Distance);
 			
 			SpawnedTriggers.Add(GetWorld()->SpawnActor<ASlingHandle>(ASlingHandle::StaticClass(), FVector(DistancesToStart[DistancesToStart.Num()-1], 200.f * Direction, 300.f), FRotator(0)));
@@ -165,10 +169,10 @@ void ATriggerManager::SpawnTriggers()
 		else if (Entry->ConveyorAudioOn)
 		{
 
-			float Distance = 500.f * Entry->Time - 500.f * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
+			float Distance = CharacterSpeed * Entry->Time - CharacterSpeed * TriggerHits[cursor - 1]->Time + DistancesToStart[DistancesToStart.Num()-1];
 			DistancesToStart.Add(Distance);
 			
-			SpawnedTriggers.Add(GetWorld()->SpawnActor<ASpeedConveyor>(ASpeedConveyor::StaticClass(), FVector(DistancesToStart[DistancesToStart.Num()-1], 300.f, 0), FRotator(0)));
+			SpawnedTriggers.Add(GetWorld()->SpawnActor<ASpeedConveyor>(ASpeedConveyor::StaticClass(), FVector(DistancesToStart[DistancesToStart.Num()-1], 0, 0), FRotator(0)));
 		}
 		
 		SpawnedTriggers[cursor]->TimeStamp = TriggerHits[cursor]->Time;

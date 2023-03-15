@@ -73,6 +73,8 @@ private:
 
 	AMusicManager *MusicManager;
 
+	ATP_FirstPersonCharacter* PlayerRef;
+
 public:
 	// initialized in engine
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
